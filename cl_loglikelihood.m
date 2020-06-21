@@ -1,28 +1,33 @@
-function [LL] = cl_loglikelihood(x, a, b)
-% a = chosen alternative
-% b = matrix including the parameters for all alternatives for each choice
-% task
-% x = beta
-% this loglikelihood function uses data with two alternatives per choice
-% task
+function [LL] = cl_loglikelihood(parameters)
+
+global DATA
+global total_individuals
+global personIDS
 
 logprobabilities = [];
-totalalternatives = 2;
-totalindividuals = 430;
-ugh = x;
+chosen = DATA(:,5);
 
-for i = 1:totalindividuals*24
-    sub_b = b(1+totalalternatives*(i-1):totalalternatives*i,:);
-    numerator1 = exp(x*sub_b(1,1:(end-1))'*sub_b(1,end));
-    numerator2 = exp(x*sub_b(2,1:(end-1))'*sub_b(2,end));
-    denominator = numerator1+numerator2;
+for i = 1:total_individuals
+    xmatrix = DATA(DATA(:,1) == personIDS(i),6:26);
+    lifeyears = DATA(DATA(:,1) == personIDS(i),27);
     
-    probability1 = log(numerator1/denominator);
-    probability2 = log(numerator2/denominator);
+    xmatrix = xmatrix.*lifeyears;
+    alpha1 = repmat([0;1;1;0], 12, 1);
     
-    logprobabilities = [logprobabilities; probability1; probability2];
+%     xmatrix = [alpha1 xmatrix];
+    numerators = exp(xmatrix*parameters');
+    denominators = zeros(48,1);
+    
+    for t = 1:2:47
+        temp = numerators(t:t+1,:); %
+        temp_denominator = sum(temp); %
+        denominators(t:t+1) = ones(2,1)*temp_denominator; %
+    end
+    
+    logprobabilities = [logprobabilities; log(numerators ./denominators)];
+    
 end
 
-LL = a'*-logprobabilities;
+LL = chosen'*-logprobabilities;
 
 end

@@ -1,40 +1,44 @@
-function[LL] = cl_loglikelihood2(parameters, a, b)
-% parameters = estimates
-% a = chosen alternatives per choicetask and per individual
-% b = corresponding variables for each alternative
+function[LL] = cl_loglikelihood2(parameters)
 
-LL = 0;
+global DATAGAMMA
+global total_individuals
+global personIDS
+
+parameters_beta = parameters(1:21);
+parameters_gamma = parameters(22:26);
+
 logprobabilities = [];
-totalalternatives = 2;
+chosen = DATAGAMMA(:,5);
 
-for i = 1:10320
-    sub_b = b(1+totalalternatives*(i-1):totalalternatives*i,:);
-   
-    x1 = sub_b(1,1:21);
-    x2 = sub_b(2,1:21);
+for i = 1:total_individuals
+    xmatrix = DATAGAMMA(DATAGAMMA(:,1) == personIDS(i),:);
+    lifeyears = DATAGAMMA(DATAGAMMA(:,1) == personIDS(i),27);
     
-    z1 = sub_b(1, 22:26);
-    z2 = sub_b(2, 22:26);
+    xmatrix(:,6:26) = xmatrix(:,6:26).*lifeyears;
+%     alpha1 = repmat([0;1;1;0], 12, 1);
+%     xmatrix = [xmatrix(:, 1:5) alpha1 xmatrix(:, 6:end)];
+    xmatrix(:,27) = [];
+    x_variables = xmatrix(:, 6:26);
+    z_variables = xmatrix(:, 27:31);
+    num = zeros(48,1);
     
-    life_years1 = sub_b(1, end);
-    life_years2 = sub_b(2, end);
+    for t = 1:48
+        x = x_variables(t,:);
+        z = z_variables(t,:);
+        num(t) = model2(parameters_beta, x, parameters_gamma, z);
+        
+    end
     
-    beta1 = parameters(1:21);
-    gamma1 = parameters(22:26);
+    num = exp(num);
     
-    mu1 = model2(beta1, x1, gamma1, z1);
-    mu2 = model2(beta1, x2, gamma1, z2);
+    denom = movsum(num,2);
+    denom = denom(2:2:end);
+    denom = reshape(repmat(denom', 2, 1), 1, [])';
+    probabilities = log(num./denom);
+    logprobabilities = [logprobabilities; probabilities];
     
-    numerator1 = exp(mu1*life_years1);
-    numerator2 = exp(mu2*life_years2);
-    denominator = numerator1+numerator2;
-    
-    probability1 = log(numerator1/denominator);
-    probability2 = log(numerator2/denominator);
-    
-    logprobabilities = [logprobabilities; probability1; probability2];
 end
 
-LL = a'*-logprobabilities;
+LL = chosen'*-logprobabilities;
 
 end

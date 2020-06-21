@@ -1,4 +1,8 @@
 function[finaldraws] = makedraws(number)
+% Calculate draws of standardized random terms for random coefficients and save if specified
+% Written by Kenneth Train, August 6, 2006.
+ 
+% Array of draws has dimension NMEMxNPxNV.
 
 global R
 global total_individuals
