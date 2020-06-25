@@ -12,9 +12,6 @@ for i = 1:total_individuals
     lifeyears = DATA(DATA(:,1) == personIDS(i),27);
     
     xmatrix = xmatrix.*lifeyears;
-    alpha1 = repmat([0;1;1;0], 12, 1);
-    
-%     xmatrix = [alpha1 xmatrix];
     numerators = exp(xmatrix*parameters');
     denominators = zeros(48,1);
     

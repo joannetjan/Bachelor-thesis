@@ -1,9 +1,9 @@
 function[LL] = mixl_loglikelihood(parameters)
 
-beta0 = parameters(1:21);
-sigma0 = abs(parameters(22:42));
+beta1 = parameters(1:21);
+sigma1 = abs(parameters(22:42));
 
-probabilities = mxll(beta0, sigma0);
+probabilities = mxll(beta1, sigma1);
 
 LL = -sum(log(probabilities));
 

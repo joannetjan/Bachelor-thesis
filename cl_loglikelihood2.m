@@ -15,20 +15,26 @@ for i = 1:total_individuals
     lifeyears = DATAGAMMA(DATAGAMMA(:,1) == personIDS(i),27);
     
     xmatrix(:,6:26) = xmatrix(:,6:26).*lifeyears;
-%     alpha1 = repmat([0;1;1;0], 12, 1);
-%     xmatrix = [xmatrix(:, 1:5) alpha1 xmatrix(:, 6:end)];
     xmatrix(:,27) = [];
     x_variables = xmatrix(:, 6:26);
     z_variables = xmatrix(:, 27:31);
-    num = zeros(48,1);
     
-    for t = 1:48
-        x = x_variables(t,:);
-        z = z_variables(t,:);
-        num(t) = model2(parameters_beta, x, parameters_gamma, z);
-        
+    temp1 = zeros(48,21); % tranform z matrix into longformat
+    for number = 1:48
+        z = z_variables(number,:);
+        temp1(number,2:end) = repelem(z, 4);
     end
     
+    temp2 = repelem(parameters_gamma, 4);
+    temp2 = repmat(temp2, 48, 1); %gamma 48x21 matrix
+    gamma1 = zeros(48,21);
+    gamma1(:, 2:end) = temp2;
+    
+    rf = (temp1.*gamma1)+1;
+    rf = rf.*parameters_beta;
+    
+    num = rf.*x_variables;
+    num = sum(num,2);
     num = exp(num);
     
     denom = movsum(num,2);

@@ -1,4 +1,4 @@
-function[p] = mxll(beta0, sigma0)
+function[p] = mxll(beta1, sigma1)
 
 global DISTRIBUTION1
 global DATA
@@ -7,8 +7,8 @@ global personIDS
 global R
 
 % sigma0 = exp(sigma0);
-cd = diag(chol(eye(21).*sigma0));
-c = repmat(beta0',[1,total_individuals,R])+repmat(cd, [1,total_individuals,R]).*DISTRIBUTION1;
+cd = diag(chol(eye(21).*sigma1));
+c = repmat(beta1',[1,total_individuals,R])+repmat(cd, [1,total_individuals,R]).*DISTRIBUTION1;
 c = permute(c, [3,1,2]);
 
 p = zeros(total_individuals, 1);
@@ -21,9 +21,6 @@ for i = 1:total_individuals
     sum_per_i = 0;
     distribution_per_individual = c(:,:,i);
     x_variables = x_variables.*lifeyears; %
-    
-%     alpha1 = repmat([0;1;1;0], 12, 1);
-%     x_variables = [alpha1 x_variables];
     
     for r = 1:R
         draw = distribution_per_individual(r,:);

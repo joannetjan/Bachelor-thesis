@@ -8,6 +8,8 @@ global characteristics
 global personIDS
 
 
+parameters_beta = parameters(1:21);
+parameters_characteristics = parameters(22:end);
 logprobabilities = [];
 chosen = DATA(:,5);
 
@@ -16,15 +18,15 @@ for i = 1:total_individuals
     lifeyears = DATA(DATA(:,1) == personIDS(i),27);
     
     %  13:14 for N4 and N5 term
-    person_characteristics = characteristics(characteristics(:,1) == personIDS(i),2:14);
-    person_characteristics = repmat(person_characteristics, 48, 1);
-    xmatrix = [xmatrix person_characteristics];
+    person_characteristics = characteristics(characteristics(:,1) == personIDS(i),2:end);
+    c = (person_characteristics * parameters_characteristics')+1;
+    parameters_beta = parameters_beta.*c;
+%     person_characteristics = repmat(person_characteristics, 48, 1);
+%     xmatrix = [xmatrix person_characteristics];
     
     xmatrix = xmatrix.*lifeyears;
-%     alpha1 = repmat([0;1;1;0], 12, 1);
-%     xmatrix = [alpha1 xmatrix];
     
-    numerators = exp(xmatrix*parameters');
+    numerators = exp(xmatrix*parameters_beta');
     denominators = movsum(numerators,2);
     denominators = denominators(2:2:end);
     denominators = reshape(repmat(denominators', 2, 1), 1, [])';
